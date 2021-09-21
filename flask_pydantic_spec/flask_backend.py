@@ -149,7 +149,7 @@ class FlaskBackend:
             request,
             "context",
             Context(
-                query=query.parse_obj(req_query) if query else None,
+                query=query.model.parse_obj(req_query) if query else None,
                 body=getattr(body, "model").parse_obj(parsed_body)
                 if body and getattr(body, "model")
                 else None,
@@ -172,30 +172,30 @@ class FlaskBackend:
         **kwargs: Mapping[str, Any],
     ) -> FlaskResponse:
         response, req_validation_error, resp_validation_error = None, None, None
-        try:
-            self.request_validation(request, query, body, headers, cookies)
-        except ValidationError as err:
-            req_validation_error = err
-            response = make_response(
-                jsonify(err.errors()), self.config.VALIDATION_ERROR_CODE
-            )
+        # try:
+        self.request_validation(request, query, body, headers, cookies)
+        # except ValidationError as err:
+        #     req_validation_error = err
+        #     response = make_response(
+        #         jsonify(err.errors()), self.config.VALIDATION_ERROR_CODE
+        #     )
 
         before(request, response, req_validation_error, None)
-        if req_validation_error:
-            abort(response)  # type: ignore
+        # if req_validation_error:
+        #     abort(response)  # type: ignore
 
         response = make_response(func(*args, **kwargs))
 
         if resp and resp.has_model() and getattr(resp, "validate"):
             model = resp.find_model(response.status_code)
             if model:
-                try:
-                    model.validate(response.get_json())
-                except ValidationError as err:
-                    resp_validation_error = err
-                    response = make_response(
-                        jsonify({"message": "response validation error"}), 500
-                    )
+                # try:
+                model.validate(response.get_json())
+                # except ValidationError as err:
+                #     resp_validation_error = err
+                #     response = make_response(
+                #         jsonify({"message": "response validation error"}), 500
+                #     )
 
         after(request, response, resp_validation_error, None)
 

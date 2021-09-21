@@ -53,7 +53,7 @@ def parse_params(
     get spec for (query, headers, cookies)
     """
     if hasattr(func, "query"):
-        model_name = getattr(func, "query").__name__
+        model_name = getattr(func, "query").model.__name__
         query = models.get(model_name)
         if query is not None:
             for name, schema in query["properties"].items():
